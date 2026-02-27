@@ -4,7 +4,7 @@ class Lliga(models.Model):
     class Meta:
         verbose_name_plural = "Lligues"
     nom = models.CharField(max_length=100)
-    pais = models.CharField(max_length=50)
+    pais = models.CharField(max_length=50, default="Catalunya")
     temporada = models.CharField(max_length=20)
 
     def __str__(self):
@@ -20,12 +20,15 @@ class Equip(models.Model):
 
 class Jugador(models.Model):
     nom = models.CharField(max_length=100)
-    cognom = models.CharField(max_length=100)
+    cognom = models.CharField(max_length=100, null=True, blank=True) # Permet buit per compatibilitat amb script
     posicio = models.CharField(max_length=50)
     equip = models.ForeignKey(Equip, on_delete=models.CASCADE, related_name='jugadors')
-
+    edat = models.IntegerField(null=True, blank=True)
+    
     def __str__(self):
-        return f"{self.nom} {self.cognom}"
+        if self.cognom:
+            return f"{self.nom} {self.cognom}"
+        return self.nom
 
 class Partit(models.Model):
     class Meta:
@@ -34,7 +37,7 @@ class Partit(models.Model):
     lliga = models.ForeignKey(Lliga, on_delete=models.CASCADE, related_name='partits')
     local = models.ForeignKey(Equip, on_delete=models.CASCADE, related_name="partits_local")
     visitant = models.ForeignKey(Equip, on_delete=models.CASCADE, related_name="partits_visitant")
-    data = models.DateTimeField()
+    data = models.DateTimeField(null=True, blank=True) # Canviat a opcional perquè l'script no el posa
     detalls = models.TextField(null=True, blank=True)
 
     def __str__(self):
@@ -54,7 +57,6 @@ class Partit(models.Model):
             tipus=Event.EventType.GOL, equip=self.visitant).count()
 
 class Event(models.Model):
-    # el tipus d'event l'implementem amb algo tipus "enum"
     class EventType(models.TextChoices):
         GOL = "GOL"
         AUTOGOL = "AUTOGOL"
@@ -72,7 +74,5 @@ class Event(models.Model):
     tipus = models.CharField(max_length=30, choices=EventType.choices)
     jugador = models.ForeignKey(Jugador, null=True, on_delete=models.SET_NULL, related_name="events_fets")
     equip = models.ForeignKey(Equip, null=True, on_delete=models.SET_NULL)
-    
-    # per les faltes
     jugador2 = models.ForeignKey(Jugador, null=True, blank=True, on_delete=models.SET_NULL, related_name="events_rebuts")
     detalls = models.TextField(null=True, blank=True)
