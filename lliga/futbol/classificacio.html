@@ -1,0 +1,11 @@
+<h2>Classificació</h2>
+<ol>
+{% for equip in classificacio %}
+    <li>{{ equip.1 }} ({{ equip.0 }} punts)</li>
+{% endfor %}
+</ol>
+
+<hr>
+<p style="color: gray; font-size: 0.8em;">
+    Temps de generació: {{ temps }} segons.
+</p>
